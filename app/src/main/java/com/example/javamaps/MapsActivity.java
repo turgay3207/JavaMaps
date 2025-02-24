@@ -28,7 +28,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.javamaps.databinding.ActivityMapsBinding;
 import com.google.android.material.snackbar.Snackbar;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnMapLongClickListener {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
@@ -68,6 +68,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        mMap.setOnMapLongClickListener(this);
 //casting
          locationManager= (LocationManager) getSystemService(Context.LOCATION_SERVICE);
            locationListener=new LocationListener() {
@@ -144,5 +145,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
+    @Override
+    public void onMapLongClick(@NonNull LatLng latLng) {
 
+        mMap.addMarker(new MarkerOptions().position(latLng));
+
+
+    }
 }
