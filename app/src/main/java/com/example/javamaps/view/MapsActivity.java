@@ -1,4 +1,4 @@
-package com.example.javamaps;
+package com.example.javamaps.view;
 
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
+import androidx.room.Room;
 
 import android.Manifest;
 import android.content.Context;
@@ -19,6 +20,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.javamaps.R;
+import com.example.javamaps.model.Place;
+import com.example.javamaps.roomdb.PlaceDao;
+import com.example.javamaps.roomdb.PlaceDatabase;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -38,6 +43,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     SharedPreferences sharedPreferences;
     boolean info;
 
+    PlaceDao placeDao;
+    PlaceDatabase db;
+    Double selectedLatitude;
+    Double selectedLongitude;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +64,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         sharedPreferences=MapsActivity.this.getSharedPreferences("com.example.javamaps",MODE_PRIVATE);
         info=false;
 
+        db = Room.databaseBuilder(getApplicationContext(),PlaceDatabase.class,"Places").build();
+
+        placeDao= db.placeDao();
+        selectedLatitude=0.0;
+        selectedLongitude=0.0;
+
+
     }
 
     /**
@@ -69,6 +86,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setOnMapLongClickListener(this);
+
+        binding.saveButton.setEnabled(false);
 //casting
          locationManager= (LocationManager) getSystemService(Context.LOCATION_SERVICE);
            locationListener=new LocationListener() {
@@ -148,7 +167,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapLongClick(@NonNull LatLng latLng) {
 
+        mMap.clear();
         mMap.addMarker(new MarkerOptions().position(latLng));
+
+        selectedLatitude=latLng.latitude;
+        selectedLongitude=latLng.longitude;
+
+        binding.saveButton.setEnabled(true);
+
+
+    }
+
+    public void save(View view){
+
+    Place place=new Place(binding.placeNameText.getText().toString(),selectedLatitude,selectedLongitude);
+    placeDao.insert(place);
+
+    }
+    public void delete(View view){
 
 
     }

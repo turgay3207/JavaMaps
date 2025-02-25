@@ -14,7 +14,7 @@
         android:theme="@style/Theme.JavaMaps"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity2"
+            android:name=".view.MainActivity2"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,7 +38,7 @@
             android:value="AIzaSyDHK9hma3LYqlIQY2blvTDHcnzNKNC_DKE" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".view.MapsActivity"
             android:exported="true"
             android:label="@string/title_activity_maps">
             <intent-filter>
@@ -48,7 +48,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".view.MainActivity"
             android:exported="true"></activity>
     </application>
 
