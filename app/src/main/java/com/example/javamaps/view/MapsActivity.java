@@ -11,6 +11,7 @@ import androidx.room.Room;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -33,6 +34,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.javamaps.databinding.ActivityMapsBinding;
 import com.google.android.material.snackbar.Snackbar;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback,GoogleMap.OnMapLongClickListener {
 
     private GoogleMap mMap;
@@ -47,6 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     PlaceDatabase db;
     Double selectedLatitude;
     Double selectedLongitude;
+    private CompositeDisposable compositeDisposable=new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,11 +188,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void save(View view){
 
     Place place=new Place(binding.placeNameText.getText().toString(),selectedLatitude,selectedLongitude);
-    placeDao.insert(place);
+    //threading--> Main (UI), Default(CPU Intensive), IO (network,database)
+
+      // placeDao.insert(place).subscribeOn(Schedulers.io()).subscribe();
+        //dispoasable
+        compositeDisposable.add(placeDao.insert(place)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(MapsActivity.this::handleResponse)
+        );
 
     }
     public void delete(View view){
+/*
+        compositeDisposable.add(placeDao.delete()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(MapsActivity.this::handleResponse)
+        );
+*/
+    }
 
 
+public void handleResponse(){
+    Intent intent=new Intent(MapsActivity.this,MainActivity2.class);
+    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+    startActivity(intent );
+}
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
     }
 }
